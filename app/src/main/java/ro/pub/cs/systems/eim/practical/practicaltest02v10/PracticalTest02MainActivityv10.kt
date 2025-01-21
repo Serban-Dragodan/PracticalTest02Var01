@@ -10,6 +10,9 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.concurrent.thread
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import java.io.InputStream
 
 class PracticalTest02MainActivityv10 : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,7 +25,6 @@ class PracticalTest02MainActivityv10 : AppCompatActivity() {
         val abilitiesTextView = findViewById<TextView>(R.id.abilitiesTextView)
         val pokemonImageView = findViewById<ImageView>(R.id.pokemonImageView)
 
-
         searchButton.setOnClickListener {
             val pokemonName = pokemonNameInput.text.toString()
 
@@ -34,7 +36,12 @@ class PracticalTest02MainActivityv10 : AppCompatActivity() {
         }
     }
 
-    private fun fetchPokemonData(pokemonName: String, typesTextView: TextView, abilitiesTextView: TextView, pokemonImageView: ImageView) {
+    private fun fetchPokemonData(
+        pokemonName: String,
+        typesTextView: TextView,
+        abilitiesTextView: TextView,
+        pokemonImageView: ImageView
+    ) {
         thread {
             val url = "https://pokeapi.co/api/v2/pokemon/$pokemonName"
             val response = getHttpResponse(url)
@@ -46,9 +53,9 @@ class PracticalTest02MainActivityv10 : AppCompatActivity() {
                     typesTextView.text = "Types: ${pokemon.types.joinToString { it.type.name }}"
                     abilitiesTextView.text = "Abilities: ${pokemon.abilities.joinToString { it.ability.name }}"
 
-
                     val imageUrl = pokemon.sprites.front_default
-//                    pokemonImageView.setImageResource(R.drawable.pokemon_placeholder)
+                    // Descarcă imaginea și setează-o în ImageView
+                    downloadImage(imageUrl, pokemonImageView)
                 }
             } else {
                 runOnUiThread {
@@ -99,5 +106,34 @@ class PracticalTest02MainActivityv10 : AppCompatActivity() {
         val frontDefault = spritesObject.getString("front_default")
 
         return PokemonResponse(name, types, abilities, Sprites(frontDefault))
+    }
+
+
+    private fun downloadImage(imageUrl: String, imageView: ImageView) {
+        thread {
+            try {
+                val url = URL(imageUrl)
+                val connection = url.openConnection() as HttpURLConnection
+                connection.connect()
+
+                val inputStream: InputStream = connection.inputStream
+                val bitmap = BitmapFactory.decodeStream(inputStream)
+
+                if (bitmap != null) {
+                    runOnUiThread {
+                        imageView.setImageBitmap(bitmap)
+                    }
+                } else {
+                    runOnUiThread {
+                        Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                runOnUiThread {
+                    Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 }
