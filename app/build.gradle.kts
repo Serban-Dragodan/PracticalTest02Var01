@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "ro.pub.cs.systems.eim.practical.practicaltest02v10"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "ro.pub.cs.systems.eim.practical.practicaltest02v10"
         minSdk = 25
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
